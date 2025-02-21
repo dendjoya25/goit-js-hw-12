@@ -1,15 +1,16 @@
 import axios from 'axios';
 
 const BASE_URL = 'https://pixabay.com/api/?';
+const API_KEY = '45497823-3ee11a5b90ff874601dfe7178';
 
 export const getAxiosPhotos = async (searchedQuery, page) => {
   const urlParams = new URLSearchParams({
-    key: '45497823-3ee11a5b90ff874601dfe7178',
+    key: API_KEY,
     q: searchedQuery,
     image_type: 'photo',
     orientation: 'horizontal',
     safesearch: 'true',
-    per_page: 40,
+    per_page: 18,
     page: page,
   });
 

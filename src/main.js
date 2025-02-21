@@ -12,29 +12,20 @@ const galleryEl = document.querySelector('.js-gallery');
 const loaderEl = document.querySelector('.js-loader');
 const loadMoreBtnEl = document.querySelector('.load-more-btn-js');
 
-const removeloadBtnClass = () => {
-  loadMoreBtnEl.classList.remove('is-hidden');
+const params = {
+  searchedValue: '',
+  page: 1,
+  total: 100,
 };
 
-const addloadBtnClass = () => {
-  loadMoreBtnEl.classList.add('is-hidden');
-};
-const showLoader = () => {
-  loaderEl.classList.remove('is-hidden');
-};
-
-const hideLoader = () => {
-  loaderEl.classList.add('is-hidden');
-};
-let page = 1;
-addloadBtnClass();
 const onFormElSubmit = async event => {
   event.preventDefault();
-  const searchedValue = formEl.elements.user_query.value;
+  params.searchedValue = formEl.elements.user_query.value.trim();
+  params.page = 1;
 
   showLoader();
 
-  const data = await getAxiosPhotos(searchedValue, page);
+  const data = await getAxiosPhotos(params.searchedValue, params.page);
   if (data.hits && data.hits.length === 0) {
     iziToast.error({
       message:
@@ -52,20 +43,21 @@ const onFormElSubmit = async event => {
 
   galleryEl.innerHTML = galleryCardsTemplate;
 
-  page = 1;
+  params.total = data.totalHits;
 
-  initializeLightbox();
+  checkBtnStatus();
+
   hideLoader();
-  removeloadBtnClass();
+  showloadBtn();
 };
 
-const onloadMoreBtnElSubmit = async () => {
+const onloadMoreBtnElClick = async () => {
+  hideloadBtn();
   showLoader();
 
-  page = page + 1;
+  params.page += 1;
 
-  const searchedValue = formEl.elements.user_query.value;
-  const data = await getAxiosPhotos(searchedValue, page);
+  const data = await getAxiosPhotos(params.searchedValue, params.page);
   const galleryCardsTemplate = data.hits
     .map(imgDetails => createGalleryCardTemplate(imgDetails))
     .join('');
@@ -74,8 +66,40 @@ const onloadMoreBtnElSubmit = async () => {
 
   initializeLightbox();
   hideLoader();
-  removeloadBtnClass();
+  showloadBtn();
+  checkBtnStatus();
 };
 
-loadMoreBtnEl.addEventListener('click', onloadMoreBtnElSubmit);
+const showLoader = () => {
+  loaderEl.classList.remove('is-hidden');
+};
+
+const hideLoader = () => {
+  loaderEl.classList.add('is-hidden');
+};
+
+const showloadBtn = () => {
+  loadMoreBtnEl.classList.remove('is-hidden');
+};
+
+const hideloadBtn = () => {
+  loadMoreBtnEl.classList.add('is-hidden');
+};
+
+const checkBtnStatus = () => {
+  const perPage = 18;
+  const maxPage = Math.ceil(params.total / perPage);
+
+  if (params.page >= maxPage) {
+    hideloadBtn();
+    iziToast.error({
+      position: 'topRight',
+      message: "We're sorry, but you've reached the end of search results.",
+    });
+  } else {
+    showloadBtn();
+  }
+};
+
+loadMoreBtnEl.addEventListener('click', onloadMoreBtnElClick);
 formEl.addEventListener('submit', onFormElSubmit);
