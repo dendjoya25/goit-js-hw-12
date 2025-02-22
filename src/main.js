@@ -6,6 +6,8 @@ import {
 import { getAxiosPhotos } from './js/pixabay-api';
 import iziToast from 'izitoast';
 
+/* =================================================================== */
+
 const formEl = document.querySelector('.js-page-form');
 const galleryEl = document.querySelector('.js-gallery');
 
@@ -14,8 +16,9 @@ const loadMoreBtnEl = document.querySelector('.load-more-btn-js');
 
 const params = {
   searchedValue: '',
-  page: 1,
-  total: 100,
+  page: null,
+  total: null,
+  perPage: 18,
 };
 
 const onFormElSubmit = async event => {
@@ -25,7 +28,11 @@ const onFormElSubmit = async event => {
 
   showLoader();
 
-  const data = await getAxiosPhotos(params.searchedValue, params.page);
+  const data = await getAxiosPhotos(
+    params.searchedValue,
+    params.page,
+    params.perPage
+  );
   if (data.hits && data.hits.length === 0) {
     iziToast.error({
       message:
@@ -68,7 +75,10 @@ const onloadMoreBtnElClick = async () => {
   hideLoader();
   showloadBtn();
   checkBtnStatus();
+  scrollPage();
 };
+
+/* =================================================================== */
 
 const showLoader = () => {
   loaderEl.classList.remove('is-hidden');
@@ -99,6 +109,15 @@ const checkBtnStatus = () => {
   } else {
     showloadBtn();
   }
+};
+
+const scrollPage = () => {
+  const info = galleryEl.firstElementChild.getBoundingClientRect();
+  const height = info.height + 102;
+  scrollBy({
+    behavior: 'smooth',
+    top: height * 2,
+  });
 };
 
 loadMoreBtnEl.addEventListener('click', onloadMoreBtnElClick);
