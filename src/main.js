@@ -41,6 +41,8 @@ const onFormElSubmit = async event => {
     });
     galleryEl.innerHTML = '';
     formEl.reset();
+    hideLoader();
+    hideloadBtn();
     return;
   }
 
@@ -77,7 +79,6 @@ const onloadMoreBtnElClick = async () => {
   checkBtnStatus();
   scrollPage();
 };
-
 /* =================================================================== */
 
 const showLoader = () => {
