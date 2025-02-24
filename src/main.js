@@ -24,40 +24,56 @@ const params = {
 const onFormElSubmit = async event => {
   event.preventDefault();
   params.searchedValue = formEl.elements.user_query.value.trim();
-  params.page = 1;
 
-  showLoader();
-
-  const data = await getAxiosPhotos(
-    params.searchedValue,
-    params.page,
-    params.perPage
-  );
-  if (data.hits && data.hits.length === 0) {
+  if (!params.searchedValue) {
     iziToast.error({
-      message:
-        'Sorry, there are no images matching your search query. Please try again!',
+      message: 'Please enter a valid search query!',
       position: 'topRight',
     });
     galleryEl.innerHTML = '';
     formEl.reset();
-    hideLoader();
-    hideloadBtn();
     return;
   }
+  params.page = 1;
 
-  const galleryCardsTemplate = data.hits
-    .map(imgDetails => createGalleryCardTemplate(imgDetails))
-    .join('');
+  showLoader();
+  try {
+    const data = await getAxiosPhotos(
+      params.searchedValue,
+      params.page,
+      params.perPage
+    );
+    if (data.hits && data.hits.length === 0) {
+      iziToast.error({
+        message:
+          'Sorry, there are no images matching your search query. Please try again!',
+        position: 'topRight',
+      });
+      galleryEl.innerHTML = '';
+      formEl.reset();
+      hideLoader();
+      hideloadBtn();
+      return;
+    }
 
-  galleryEl.innerHTML = galleryCardsTemplate;
+    const galleryCardsTemplate = data.hits
+      .map(imgDetails => createGalleryCardTemplate(imgDetails))
+      .join('');
 
-  params.total = data.totalHits;
+    galleryEl.innerHTML = galleryCardsTemplate;
 
-  checkBtnStatus();
+    params.total = data.totalHits;
 
-  hideLoader();
-  showloadBtn();
+    hideLoader();
+    checkBtnStatus();
+  } catch (error) {
+    iziToast.error({
+      message: 'Something went wrong. Please try again!',
+      position: 'topRight',
+    });
+    hideLoader();
+    return;
+  }
 };
 
 const onloadMoreBtnElClick = async () => {
@@ -66,7 +82,11 @@ const onloadMoreBtnElClick = async () => {
 
   params.page += 1;
 
-  const data = await getAxiosPhotos(params.searchedValue, params.page);
+  const data = await getAxiosPhotos(
+    params.searchedValue,
+    params.page,
+    params.perPage
+  );
   const galleryCardsTemplate = data.hits
     .map(imgDetails => createGalleryCardTemplate(imgDetails))
     .join('');
@@ -75,7 +95,6 @@ const onloadMoreBtnElClick = async () => {
 
   initializeLightbox();
   hideLoader();
-  showloadBtn();
   checkBtnStatus();
   scrollPage();
 };

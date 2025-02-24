@@ -13,10 +13,6 @@ export const getAxiosPhotos = async (searchedQuery, page) => {
     page: page,
   });
 
-  try {
-    const response = await axios.get(`${BASE_URL}${urlParams}`);
-    return response.data;
-  } catch (err) {
-    throw new Error(err.message);
-  }
+  const response = await axios.get(`${BASE_URL}${urlParams}`);
+  return response.data;
 };
