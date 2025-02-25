@@ -32,6 +32,7 @@ const onFormElSubmit = async event => {
     });
     galleryEl.innerHTML = '';
     formEl.reset();
+    hideloadBtn();
     return;
   }
   params.page = 1;
@@ -56,16 +57,16 @@ const onFormElSubmit = async event => {
       return;
     }
 
+    params.total = data.totalHits;
+    checkBtnStatus();
+
     const galleryCardsTemplate = data.hits
       .map(imgDetails => createGalleryCardTemplate(imgDetails))
       .join('');
 
     galleryEl.innerHTML = galleryCardsTemplate;
 
-    params.total = data.totalHits;
-
     hideLoader();
-    checkBtnStatus();
   } catch (error) {
     iziToast.error({
       message: 'Something went wrong. Please try again!',
